@@ -1,0 +1,2 @@
+
+<?php echo $__env->make('adminlte::auth.login', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH C:\Users\jjdd1\Downloads\Canvas-Church\resources\views/auth/login.blade.php ENDPATH**/ ?>

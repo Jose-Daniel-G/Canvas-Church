@@ -1,0 +1,193 @@
+@extends('adminlte::page')
+
+@section('title', 'JDeveloper')
+@section('css')
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.5.2/css/bootstrap.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/responsive/3.0.3/css/responsive.bootstrap4.css">
+@stop
+@section('content_header')
+    <h1>Lista de usuarios</h1>
+@stop
+@section('content')
+    <div class="card card-outline card-primary">
+        <div class="card-header">
+            <h3 class="card-title">Usuarios registrados</h3>
+            @can('admin.users.create')
+                <div class="card-tools">
+                    <a class="btn btn-secondary" data-toggle="modal" data-target="#createModal">Registrar<i
+                            class="bi bi-plus-circle-fill"></i></a>{{-- button create --}}
+                </div>
+            @endcan
+        </div>
+        <div class="card-body">
+            <table id="usuarios" class="table table-striped table-bordered table-hover table-sm">
+                <thead class="table-dark">
+                    <tr>
+                        <th>ID</th>
+                        <th>Nombre</th>
+                        <th>Email</th>
+                        <th class="text-center"> Acciones </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse ($users as $user)
+                        <tr>
+                            <td>{{ $user->id }}</td>
+                            <td>{{ $user->name }}</td>
+                            <td>{{ $user->email }}</td>
+                            <td class="text-center">
+                                @can('admin.users.edit')
+                                    {{-- button EDIT --}}
+                                    <a href="#" class="btn btn-warning btn-sm mr-1" data-id="{{ $user->id }}"
+                                        data-toggle="modal" data-target="#editModal" title="Editar"> <i
+                                            class="fas fa-edit"></i></a>
+                                @endcan
+
+                                @can('admin.users.destroy')
+                                    <form action="{{ route('admin.users.toggleStatus', $user->id) }}" method="POST"
+                                        style="display:inline;">
+                                        @csrf
+                                        @method('PATCH') <!-- Laravel permite cambios parciales con PATCH -->
+                                        <button type="submit" class="btn {{ $user->status ? 'btn-danger' : 'btn-success' }}">
+                                            {!! $user->status ? '<i class="fa-solid fa-circle-xmark"></i>' : '<i class="fa-solid fa-square-check"></i>' !!}
+                                        </button>
+                                    </form>
+                                @endcan
+
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="4" class="text-center">No hay permisos registrados.</td>
+                        </tr>
+                    @endforelse
+
+                </tbody>
+            </table>
+            @include('admin.users.create')
+            @include('admin.users.edit')
+        </div>
+
+    </div>
+@stop
+@section('css')
+@stop
+@section('js')
+    <script>
+        new DataTable('#usuarios', {
+            responsive: true,
+            scrollX: true,
+            autoWidth: false, //no le vi la funcionalidad
+            dom: 'Bfrtip', // Añade el contenedor de botones
+            buttons: [{
+                    extend: 'copyHtml5',
+                    text: '<i class="bi bi-clipboard-check"></i> Copiar',
+                    className: 'btn btn-sm btn-success'
+                }, // Added btn-sm for better consistency
+                {
+                    extend: 'csvHtml5',
+                    text: '<i class="bi bi-filetype-csv"></i> CSV',
+                    className: 'btn btn-sm btn-warning'
+                },
+                {
+                    extend: 'excelHtml5',
+                    text: '<i class="bi bi-file-earmark-excel"></i> Excel',
+                    className: 'btn btn-sm btn-secondary'
+                },
+                {
+                    extend: 'pdfHtml5',
+                    text: '<i class="bi bi-filetype-pdf"></i> PDF',
+                    className: 'btn btn-sm btn-danger'
+                },
+                {
+                    extend: 'print',
+                    text: '<i class="bi bi-printer"></i> Imprimir',
+                    className: 'btn btn-sm btn-dark'
+                },
+                {
+                    extend: 'colvis'
+                }
+            ],
+            "language": {
+                "decimal": "",
+                "emptyTable": "No hay datos disponibles en la tabla",
+                "info": "Mostrando _START_ a _END_ de _TOTAL_ entradas",
+                "infoEmpty": "Mostrando 0 a 0 de 0 entradas",
+                "infoFiltered": "(filtrado de _MAX_ entradas totales)",
+                "infoPostFix": "",
+                "thousands": ",",
+                "lengthMenu": "Mostrar _MENU_ entradas",
+                "loadingRecords": "Cargando...",
+                "processing": "",
+                "search": "Buscar:",
+                "zeroRecords": "No se encontraron registros coincidentes",
+                "paginate": {
+                    "first": "Primero",
+                    "last": "Último",
+                    "next": "Siguiente",
+                    "previous": "Anterior"
+                },
+                "aria": {
+                    "orderable": "Ordenar por esta columna",
+                    "orderableReverse": "Invertir el orden de esta columna"
+                }
+            }
+        });
+    </script>
+    <script>
+        $('#editModal').on('show.bs.modal', function(event) {
+            var button = $(event.relatedTarget);
+            var userId = button.data('id');
+            var modal = $(this);
+
+            var url = "{{ route('admin.users.edit', ':id') }}".replace(':id', userId);
+
+            $.ajax({
+                url: url,
+                method: 'GET',
+                success: function(data) {
+                    // Set the form's action URL dynamically
+                    var formAction = "{{ route('admin.users.update', ':id') }}".replace(':id', data.user
+                        .id);
+                    modal.find('#editForm').attr('action', formAction);
+
+                    // Populate the user's name, apellido and email
+                    modal.find('#edit-name').val(data.user.name);
+                    modal.find('#edit-apellido').val(data.user.apellido);
+                    modal.find('#edit-email').val(data.user.email);
+
+                    // La contraseña nunca se precarga; se limpia en cada apertura del modal
+                    modal.find('#edit-password').val('');
+                    modal.find('#edit-password_confirmation').val('');
+
+                    // Get the container for roles and clear it
+                    var rolesContainer = modal.find('#rolesContainer');
+                    rolesContainer.empty();
+
+                    // Loop through all available roles and create checkboxes
+                    data.roles.forEach(function(role) {
+                        // Check if the user has this role
+                        var isChecked = data.user.roles.some(userRole => userRole.id === role
+                            .id) ? 'checked' : '';
+
+                        // Create the HTML for the checkbox using a template literal
+                        var html = `
+                        <div class="form-check form-check-inline">
+                            <input type="checkbox" class="form-check-input" name="roles[]"
+                                value="${role.id}" id="role_${role.id}" ${isChecked}>
+                            <label class="form-check-label" for="role_${role.id}">
+                                ${role.name}
+                            </label>
+                        </div>
+                    `;
+                        rolesContainer.append(html);
+                    });
+                },
+                error: function(xhr, status, error) {
+                    console.error("Error fetching user data:", error);
+                }
+            });
+        });
+    </script>
+
+@stop

@@ -1,0 +1,50 @@
+✅ TABLAS CLAVE Q10 (CORRECTAS)
+
+Estas son esenciales y bien pensadas 👌
+
+🎓 Académico
+create_cursos_table
+create_horarios_table
+create_clases_table
+create_asistencias_table
+❌create_historial_cursos_table
+❌create_citas_table
+❌2025_09_19_100841_create_notifications_table
+❌2022_11_10_180127_create_categories_table.php
+❌2022_11_10_180156_create_posts_table.php
+❌2022_11_10_182031_create_tags_table.php
+❌2022_11_10_182335_create_post_tag_table.php
+
+🔐 Sistema
+create_users_table
+create_password_reset_tokens_table
+add_two_factor_columns_to_users_table
+create_sessions_table
+create_personal_access_tokens_table
+create_failed_jobs_table
+create_jobs_table
+create_notifications_table
+create_permission_tables
+
+⚙️ Configuración
+create_configs_table
+
+
+
+users
+ ├── roles (Spatie)
+ ├── estudiantes
+ ├── profesors
+ └── secretarias
+
+cursos
+horarios
+asistencias
+clases
+historial_cursos
+
+
+Crear una tabla historial_cursos_completados:
+❌ duplica información
+❌ se puede desincronizar
+❌ añade lógica innecesaria

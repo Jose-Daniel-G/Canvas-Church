@@ -1,0 +1,32 @@
+Editar httpd.conf
+Abre el archivo de configuración de Apache:
+--------------------------------------------------
+📂 C:\xampp\apache\conf\httpd.conf
+--------------------------------------------------
+Si ves duplicados, comenta uno de ellos agregando # al inicio:
+
+# LoadModule headers_module modules/mod_headers.so
+# LoadModule mime_module modules/mod_mime.so
+
+
+--------------------------------------------------
+----------[   Campus VirtualURCH.BAT  ]------------------
+@echo off
+echo Iniciando XAMPP, Apache y MySQL...
+
+REM Iniciar XAMPP (esto abrirá el panel de control)
+start "" "C:\xampp\xampp-control.exe"
+
+REM Esperar unos segundos para permitir que el panel se abra
+timeout /t 3 /nobreak >nul
+
+REM Navegar al proyecto y ejecutar `npm run dev`
+cd /d "C:\xampp\htdocs\www\LARAVEL\Campus Virtualurch"
+start cmd /k "npm run dev"
+
+REM Iniciar Apache y MySQL desde la línea de comandos
+start "" "C:\xampp\mysql\bin\mysqld.exe"
+"C:\xampp\apache\bin\httpd.exe"
+
+exit
+
